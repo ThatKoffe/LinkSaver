@@ -44,7 +44,7 @@ module.exports = (() => {
 				}
 			],
 			version: "0.0.4",
-			description: "Save links so that you have easy access to them!",
+			description: "Want to store links? Well now you can!",
 			github: "https://github.com/Serakoi/LinkSaver"
 		},
 		changelog: [
