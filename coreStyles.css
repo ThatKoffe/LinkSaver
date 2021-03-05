@@ -1,0 +1,16 @@
+:root {
+    --ls-bg: #23272A;
+    --ls-font-capital: #858a9b;
+    --ls-font: #fff;
+}
+
+/* ? Make Swal look nice */
+.swal-modal {
+    background-color: var(--ls-bg) !important;
+}
+.swal-modal .swal-title {
+    color: var(--ls-font-capital) !important;
+}
+.swal-modal .swal-text {
+    color: var(--ls-font) !important;
+}
