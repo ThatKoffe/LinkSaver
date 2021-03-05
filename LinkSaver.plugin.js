@@ -178,7 +178,7 @@ module.exports = (() => {
 							For links
 						*/
 						.sl-link-display {
-							display: inline-block;
+							display: block; /* inline-block */
 							padding: 0 25px;
 							height: 50px;
 							font-size: 16px;
