@@ -43,8 +43,8 @@ module.exports = (() => {
 					github_username: "Serakoi"
 				}
 			],
-			version: "0.0.4",
-			description: "Want to store links? Well now you can!",
+			version: "0.0.5",
+			description: "Save links so that you have easy access to them!",
 			github: "https://github.com/Serakoi/LinkSaver"
 		},
 		changelog: [
@@ -55,10 +55,10 @@ module.exports = (() => {
 				]
 			},
 			{
-				title: "Perma saving!",
-				type: "added",
+				title: "Fixed url displaying",
+				type: "fixed",
 				items: [
-					"Now keep all your urls with every update or restart!"
+					"URL's display now!"
 				]
 			}
 		]
@@ -270,8 +270,13 @@ module.exports = (() => {
 						reverseButtons: true
 					}).then((result) => {
 						if (result.isConfirmed) {
+							const arrayChecker = [];
+
+							for(var i in db)
+								arrayChecker.push(db[i]);
+
 							let linkLib = ``;
-							if (UserLinks.length == 0) {
+							if (arrayChecker.length == 0) {
 								linkLib = `You don't have any links yet!`;
 							} else {
 								// TODO : Make it so that the user can send it.
