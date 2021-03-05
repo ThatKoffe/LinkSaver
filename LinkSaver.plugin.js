@@ -6,7 +6,8 @@
  * @invite 7TK7Bbz
  */
 
-const { link } = require("fs");
+const fs = require('fs');
+const db = require('./LS-utils/db.json');
 
 /*@cc_on
 @if (@_jscript)
@@ -42,7 +43,7 @@ module.exports = (() => {
 					github_username: "Serakoi"
 				}
 			],
-			version: "0.0.3",
+			version: "0.0.4",
 			description: "Save links so that you have easy access to them!",
 			github: "https://github.com/Serakoi/LinkSaver"
 		},
@@ -50,31 +51,14 @@ module.exports = (() => {
 			{
 				title: "What's next?",
 				items: [
-					"Permamently keeping links stored on your machine! (This may take some time!)"
+					"Unkown yet!"
 				]
 			},
 			{
-				title: "New icon",
-				type: "improved",
-				items: [
-					"We have now added an actual icon.",
-					"Remove 'LS' and replace with a link icon."
-				]
-			},
-			{
-				title: "Added logic and style!",
+				title: "Perma saving!",
 				type: "added",
 				items: [
-					"We've FINALLY added chips for the links!",
-					"We've added some logic to the link submission."
-				]
-			},
-			{
-				title: "New theme arrival!",
-				type: "added",
-				items: [
-					"Dark mode!",
-					"Discord themed colors."
+					"Now keep all your urls with every update or restart!"
 				]
 			}
 		]
@@ -291,11 +275,16 @@ module.exports = (() => {
 								linkLib = `You don't have any links yet!`;
 							} else {
 								// TODO : Make it so that the user can send it.
-								UserLinks.forEach(x => {
+								const arrayDB = [];
+
+								for(var i in db)
+									arrayDB.push(db[i]);
+
+								arrayDB.forEach(x => {
 									linkLib = linkLib + `
-										<a class="anchor-3Z-8Bb da-anchor anchorUnderlineOnHover-2ESHQB da-anchorUnderlineOnHover" title="${x}" href="${x}" rel="noreferrer noopener" target="_blank" role="button" tabindex="0" onclick="ls_useLink('${x}')">
+										<a class="anchor-3Z-8Bb da-anchor anchorUnderlineOnHover-2ESHQB da-anchorUnderlineOnHover" title="${x.url}" href="${x.url}" rel="noreferrer noopener" target="_blank" role="button" tabindex="0" onclick="ls_useLink('${x.url}')">
 											<div class="sl-link-display">
-												${x}
+												${x.url}
 											</div>
 										</a>
 									&nbsp;`;
@@ -308,10 +297,7 @@ module.exports = (() => {
 								<div id="sl-link-box">${linkLib}</div>`,
 								'info'
 							)
-						} else if (
-							/* Read more about handling dismissals below */
-							result.dismiss === Swal.DismissReason.cancel
-						) {
+						} else if (result.dismiss === Swal.DismissReason.cancel) {
 							Swal.fire({
 								title: 'Submit new link',
 								input: 'text',
@@ -323,11 +309,21 @@ module.exports = (() => {
 								showLoaderOnConfirm: true,
 								preConfirm: (link) => {
 									// ? Do something with text
-									if(UserLinks.includes(link)){
-										createToast('Error: This link is already saved!', 'error', 3000);
+									if(!db[link]){
+										db[link] = {
+											url: link 
+										}
+										fs.writeFile(__dirname + "/LS-utils/db.json", JSON.stringify(db), (err) => {
+											console.log('[LS] ->', err)
+										})
 									} else {
-										UserLinks.push(link)
+										createToast('Error: This link is already saved!', 'error', 3000);
 									}
+									// if(UserLinks.includes(link)){
+									// 	createToast('Error: This link is already saved!', 'error', 3000);
+									// } else {
+									// 	UserLinks.push(link)
+									// }
 								},
 								allowOutsideClick: () => !Swal.isLoading()
 							  }).then((result) => {
