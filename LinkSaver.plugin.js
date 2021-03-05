@@ -42,21 +42,50 @@ module.exports = (() => {
 					github_username: "Serakoi"
 				}
 			],
-			version: "0.0.2",
+			version: "0.0.3",
 			description: "Save links so that you have easy access to them!",
 			github: "https://github.com/Serakoi/LinkSaver"
 		},
 		changelog: [
 			{
-				title: "Woah, What's this?!",
+				title: "What's next?",
+				items: [
+					"Permamently keeping links stored on your machine! (This may take some time!)"
+				]
+			},
+			{
+				title: "New icon",
+				type: "improved",
+				items: [
+					"We have now added an actual icon.",
+					"Remove 'LS' and replace with a link icon."
+				]
+			},
+			{
+				title: "Added logic and style!",
 				type: "added",
 				items: [
-					"Store your links locally!",
-					"Add links to your private library!"
+					"We've FINALLY added chips for the links!",
+					"We've added some logic to the link submission."
+				]
+			},
+			{
+				title: "New theme arrival!",
+				type: "added",
+				items: [
+					"Dark mode!",
+					"Discord themed colors."
 				]
 			}
 		]
 	};
+	// ? changelog options: added, fixed, improved
+
+	var jsonToMinimize = {
+		"pkg": {
+		
+		}
+	}
 
 	return !global.ZeresPluginLibrary ? class {
 		constructor() { this._config = config; }
@@ -94,28 +123,76 @@ module.exports = (() => {
 			<button aria-label="LinkSaver" tabindex="0" type="button" class="button-38aScr da-button lookBlank-3eh9lL colorBrand-3pXr91 grow-q77ONN da-grow">
 			<div class="contents-18-Yxp da-contents button-3AYNKb da-button button-318s1X da-button">
 			<div class="buttonWrapper-1ZmCpA da-buttonWrapper" id="children" style="opacity: 1; transform: none;">
-			LS
+			<svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6.188 8.719c.439-.439.926-.801 1.444-1.087 2.887-1.591 6.589-.745 8.445 2.069l-2.246 2.245c-.644-1.469-2.243-2.305-3.834-1.949-.599.134-1.168.433-1.633.898l-4.304 4.306c-1.307 1.307-1.307 3.433 0 4.74 1.307 1.307 3.433 1.307 4.74 0l1.327-1.327c1.207.479 2.501.67 3.779.575l-2.929 2.929c-2.511 2.511-6.582 2.511-9.093 0s-2.511-6.582 0-9.093l4.304-4.306zm6.836-6.836l-2.929 2.929c1.277-.096 2.572.096 3.779.574l1.326-1.326c1.307-1.307 3.433-1.307 4.74 0 1.307 1.307 1.307 3.433 0 4.74l-4.305 4.305c-1.311 1.311-3.44 1.3-4.74 0-.303-.303-.564-.68-.727-1.051l-2.246 2.245c.236.358.481.667.796.982.812.812 1.846 1.417 3.036 1.704 1.542.371 3.194.166 4.613-.617.518-.286 1.005-.648 1.444-1.087l4.304-4.305c2.512-2.511 2.512-6.582.001-9.093-2.511-2.51-6.581-2.51-9.092 0z"/></svg>
 			</div>
 			</div>
 			</button>
 			`
 			let UserLinks = [];
 
+			function createToast(content, type, timeout){
+				let output_type = '';
+				let output_timeout = 3000;
 
+				let types = ["info", "success", "danger", "error", "warning", "warn"]
+				if(types.includes(type)) output_type = type;
+
+				if(timeout) output_timeout = timeout;
+				BdApi.showToast(content, {
+					type: output_type,
+					timeout: output_timeout
+				})
+			}
 
 			return class saveLinks extends Plugin {
 
+				/**
+				 * 
+				 * @param {string} content Content to show inside the toast.
+				 * @param {string} type Changes the type of the toast stylistically and semantically. Choices: "", "info", "success", "danger"/"error", "warning"/"warn". Default: ""
+				 * @param {number} timeout Adjusts the time (in ms) the toast should be shown for before disappearing automatically. Default: 3000
+				 */
+
 				onStart() {
+					// ? Styling
 					PluginUtilities.addStyle(config.info.name + '-CSS',
 						`
-						@import url('https://raw.githubusercontent.com/Serakoi/LinkSaver/main/coreStyles.css');
+						:root {
+							--ls-bg: #2C2F33;
+							--ls-bg-2: #23272A;
+							--ls-font-capital: #7289DA;
+							--ls-font: #99AAB5;
+						}
+						
+						.swal2-modal {
+							background-color: var(--ls-bg) !important;
+						}
+						.swal2-modal .swal2-title {
+							color: var(--ls-font-capital) !important;
+						}
+						.swal2-modal .swal2-content {
+							color: var(--ls-font) !important;
+						}
+
+						/*
+							For links
+						*/
+						.sl-link-display {
+							display: inline-block;
+							padding: 0 25px;
+							height: 50px;
+							font-size: 16px;
+							line-height: 50px;
+							border-radius: 25px;
+							background-color: var(--ls-bg-2);
+						}
 						`
 					);
 					var script = document.createElement('script');
 					script.type = 'text/javascript';
 					script.id = config.info.name + '-SA'
 					script.src = '//cdn.jsdelivr.net/npm/sweetalert2@10';
-
+					
 					var fun = document.createElement('script');
 					fun.type = 'text/javascript';
 					fun.id = config.info.name + '-FUN'
@@ -129,35 +206,27 @@ module.exports = (() => {
 						this.generateButton();
 					}, 1000);
 
-					async function _fetch_(url){
-						const githubData = await fetch(url);
-						return githubData;
-					}
-
 					async function _checkUpdate_(){
-						// const data = await _fetch_('https://raw.githubusercontent.com/Serakoi/LinkSaver/main/main.config.json');
-						// if(data.latestVersion !== config.info.version){
-						// 	let isOpen = false;
-						// 	if (!isOpen) {
-						// 		isOpen = true;
-						// 		Swal.fire({
-						// 			title: 'Update required!',
-						// 			text: `There is a new update for ${config.info.name}`,
-						// 			icon: 'info',
-						// 			showCancelButton: true,
-						// 			confirmButtonText: 'View Links',
-						// 			cancelButtonText: 'Create Link'
-						// 		}).then((result) => {
-						// 			if (result.isConfirmed) {
-
-						// 			} else if (result.dismiss === Swal.DismissReason.cancel) {
-
-						// 			}
-						// 		});
-						// 	}
-						// }
+						const data = await fetch('https://raw.githubusercontent.com/Serakoi/LinkSaver/main/main.config.json', {
+							method: "GET"
+						});
+						console.log(data.body)
+						if(data.body.latestVersion !== config.info.version){
+							let isOpen = false;
+							if (!isOpen) {
+								isOpen = true;
+								createToast(`Update required, New LinkSaver version: ${data.latestVersion}\nUsing: ${config.info.version}`, "warning", 8000)
+								createToast(
+									data.body,
+									"info",
+									20000
+								)
+							}
+						}
 					}
-					_checkUpdate_();
+					// _checkUpdate_();
+
+					createToast('Loaded all LS assets!', "info")
 				}
 
 				onStop() {
@@ -225,7 +294,9 @@ module.exports = (() => {
 								UserLinks.forEach(x => {
 									linkLib = linkLib + `
 										<a class="anchor-3Z-8Bb da-anchor anchorUnderlineOnHover-2ESHQB da-anchorUnderlineOnHover" title="${x}" href="${x}" rel="noreferrer noopener" target="_blank" role="button" tabindex="0" onclick="ls_useLink('${x}')">
-										${x}
+											<div class="sl-link-display">
+												${x}
+											</div>
 										</a>
 									&nbsp;`;
 								});
@@ -233,7 +304,8 @@ module.exports = (() => {
 
 							Swal.fire(
 								'My Links',
-								linkLib,
+								`
+								<div id="sl-link-box">${linkLib}</div>`,
 								'info'
 							)
 						} else if (
@@ -251,14 +323,18 @@ module.exports = (() => {
 								showLoaderOnConfirm: true,
 								preConfirm: (link) => {
 									// ? Do something with text
-									UserLinks.push(link)
+									if(UserLinks.includes(link)){
+										createToast('Error: This link is already saved!', 'error', 3000);
+									} else {
+										UserLinks.push(link)
+									}
 								},
 								allowOutsideClick: () => !Swal.isLoading()
 							  }).then((result) => {
 								if (result.isConfirmed) {
 									// ? Success
 									Swal.fire({
-										title: "Link saved!",
+										title: "Done!",
 										icon: "success"
 									})
 								}
