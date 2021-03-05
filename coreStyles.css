@@ -5,12 +5,12 @@
 }
 
 /* ? Make Swal look nice */
-.swal-modal {
+.swal2-modal {
     background-color: var(--ls-bg) !important;
 }
-.swal-modal .swal-title {
+.swal2-modal .swal-title {
     color: var(--ls-font-capital) !important;
 }
-.swal-modal .swal-text {
+.swal2-modal .swal-text {
     color: var(--ls-font) !important;
 }
