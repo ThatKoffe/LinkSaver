@@ -45,7 +45,7 @@ module.exports = (() => {
 					github_username: "Serakoi"
 				}
 			],
-			version: "0.0.6",
+			version: "0.0.7",
 			description: "Save links so that you have easy access to them!",
 			github: "https://github.com/Serakoi/LinkSaver"
 		},
