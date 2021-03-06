@@ -32,6 +32,7 @@ const db = require('./LS-utils/db.json');
 	WScript.Quit();
 @else@*/
 
+
 module.exports = (() => {
 	const config = {
 		info: {
@@ -43,7 +44,7 @@ module.exports = (() => {
 					github_username: "Serakoi"
 				}
 			],
-			version: "0.0.5",
+			version: "0.0.6",
 			description: "Save links so that you have easy access to them!",
 			github: "https://github.com/Serakoi/LinkSaver"
 		},
@@ -55,10 +56,26 @@ module.exports = (() => {
 				]
 			},
 			{
-				title: "Fixed url displaying",
+				title: "Friendly urls!",
+				type: "improved",
+				items: [
+					"Woah! You can now add a friendly version of the url! This means that you can add some text that will be shown instead of the entire url"
+				]
+			},
+			{
+				title: "Bug Fixes",
 				type: "fixed",
 				items: [
-					"URL's display now!"
+					"Link underscore removed from the chip."
+				]
+			},
+			{
+				title: "Credits",
+				type: "improved",
+				items: [
+					"Seer#6054 - Developer",
+					"Kαi#4320 - Tester",
+					"Slimakoi#6422 - Tester"
 				]
 			}
 		]
@@ -67,7 +84,7 @@ module.exports = (() => {
 
 	var jsonToMinimize = {
 		"pkg": {
-		
+
 		}
 	}
 
@@ -114,14 +131,14 @@ module.exports = (() => {
 			`
 			let UserLinks = [];
 
-			function createToast(content, type, timeout){
+			function createToast(content, type, timeout) {
 				let output_type = '';
 				let output_timeout = 3000;
 
 				let types = ["info", "success", "danger", "error", "warning", "warn"]
-				if(types.includes(type)) output_type = type;
+				if (types.includes(type)) output_type = type;
 
-				if(timeout) output_timeout = timeout;
+				if (timeout) output_timeout = timeout;
 				BdApi.showToast(content, {
 					type: output_type,
 					timeout: output_timeout
@@ -170,17 +187,32 @@ module.exports = (() => {
 							border-radius: 25px;
 							background-color: var(--ls-bg-2);
 						}
+						/*
+							Buttons
+						*/
+						.ls-button {
+							margin: 10px;
+							padding: 4px;
+							border-radius: 5px;
+							background: rgba(74, 74, 74, 0.62);
+							color: var(--ls-font);
+						}
+						.ls-button.ls-remove {
+							background: rgba(255, 0, 0, 0.62);
+							color: white;
+						}
 						`
 					);
 					var script = document.createElement('script');
 					script.type = 'text/javascript';
 					script.id = config.info.name + '-SA'
 					script.src = '//cdn.jsdelivr.net/npm/sweetalert2@10';
-					
+
 					var fun = document.createElement('script');
 					fun.type = 'text/javascript';
 					fun.id = config.info.name + '-FUN'
-					fun.src = 'https://raw.githubusercontent.com/Serakoi/LinkSaver/main/fun.js';
+					fun.innerHTML = `			
+					`
 
 
 					document.getElementsByTagName('head')[0].appendChild(script);
@@ -190,12 +222,12 @@ module.exports = (() => {
 						this.generateButton();
 					}, 1000);
 
-					async function _checkUpdate_(){
+					async function _checkUpdate_() {
 						const data = await fetch('https://raw.githubusercontent.com/Serakoi/LinkSaver/main/main.config.json', {
 							method: "GET"
 						});
 						console.log(data.body)
-						if(data.body.latestVersion !== config.info.version){
+						if (data.body.latestVersion !== config.info.version) {
 							let isOpen = false;
 							if (!isOpen) {
 								isOpen = true;
@@ -218,6 +250,8 @@ module.exports = (() => {
 
 					let btn = document.getElementById('btn-' + config.info.name);
 					btn.remove();
+
+					document.getElementById(config.info.name + '-SA').remove();
 				}
 
 				onSwitch() {
@@ -272,7 +306,7 @@ module.exports = (() => {
 						if (result.isConfirmed) {
 							const arrayChecker = [];
 
-							for(var i in db)
+							for (var i in db)
 								arrayChecker.push(db[i]);
 
 							let linkLib = ``;
@@ -282,41 +316,71 @@ module.exports = (() => {
 								// TODO : Make it so that the user can send it.
 								const arrayDB = [];
 
-								for(var i in db)
+								for (var i in db)
 									arrayDB.push(db[i]);
 
+								function deleteLS(id){
+									delete db[id]
+								}
+
 								arrayDB.forEach(x => {
+									// ? Link text for older db versions
+									let linkText = x.text;
+									if (!linkText) linkText = x.url;
+
+									let linkId = x.url;
+
 									linkLib = linkLib + `
-										<a class="anchor-3Z-8Bb da-anchor anchorUnderlineOnHover-2ESHQB da-anchorUnderlineOnHover" title="${x.url}" href="${x.url}" rel="noreferrer noopener" target="_blank" role="button" tabindex="0" onclick="ls_useLink('${x.url}')">
-											<div class="sl-link-display">
-												${x.url}
-											</div>
-										</a>
+										<div class="sl-link-display">
+											<a style="text-decoration: none !important;" class="anchor-3Z-8Bb da-anchor anchorUnderlineOnHover-2ESHQB da-anchorUnderlineOnHover" title="${x.url}" href="${x.url}" rel="noreferrer noopener" target="_blank" role="button" tabindex="0" onclick="ls_useLink('${x.url}')">
+												${x.text} 
+											</a>
+											<!-- <button class="ls-button ls-remove ls_remove_link_" id="${x.url}">
+												✖
+											</button> -->
+										</div>
 									&nbsp;`;
 								});
 							}
-
 							Swal.fire(
 								'My Links',
 								`
-								<div id="sl-link-box">${linkLib}</div>`,
+								<script>
+									function ls_removeLink(id){
+										delete db[id];
+									}
+								</script>
+								<div id="sl-link-box">${linkLib}</div><br>
+								<span>Remove stored links by going to the <strong>LS-utils</strong> folder then <strong>db.json</strong> and edit that file.</span>`,
 								'info'
 							)
 						} else if (result.dismiss === Swal.DismissReason.cancel) {
 							Swal.fire({
 								title: 'Submit new link',
+								html: `
+									<input autocapitalize="off" id="ls-friendlyText" class="swal2-input" placeholder="Friendly Text" type="text" style="display: flex;">
+								`,
 								input: 'text',
 								inputAttributes: {
-								  autocapitalize: 'off'
+									placeHolder: 'Url',
+									autocapitalize: 'off'
 								},
 								showCancelButton: true,
-								confirmButtonText: 'Submit',
+								confirmButtonText: 'Next',
 								showLoaderOnConfirm: true,
 								preConfirm: (link) => {
+									if(!link) return createToast('No link provided!', 'error', 4000);
 									// ? Do something with text
-									if(!db[link]){
+									if(!db[link]) {
+										let linkId = Date.now()
+										// createToast(linkId)
+
+										let friendlyText = document.getElementById("ls-friendlyText").value;
+										if (friendlyText.length == 0) friendlyText = link
 										db[link] = {
-											url: link 
+											id: linkId,
+											url: link,
+											text: friendlyText
 										}
 										fs.writeFile(__dirname + "/LS-utils/db.json", JSON.stringify(db), (err) => {
 											console.log('[LS] ->', err)
@@ -331,7 +395,7 @@ module.exports = (() => {
 									// }
 								},
 								allowOutsideClick: () => !Swal.isLoading()
-							  }).then((result) => {
+							}).then((result) => {
 								if (result.isConfirmed) {
 									// ? Success
 									Swal.fire({
@@ -345,7 +409,11 @@ module.exports = (() => {
 
 				}
 
-			};
+
+				createCredits() {
+
+				}
+			}
 		};
 
 		return plugin(Plugin, Api);
