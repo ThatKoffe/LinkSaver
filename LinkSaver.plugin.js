@@ -4,6 +4,7 @@
  * @authorId 557218928368156674
  * @website https://github.com/Serakoi/LinkSaver
  * @invite 7TK7Bbz
+ * @updateUrl https://raw.githubusercontent.com/Serakoi/LinkSaver/main/LinkSaver.plugin.js
  */
 
 const fs = require('fs');
